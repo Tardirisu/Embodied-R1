@@ -129,8 +129,12 @@ class MCPStateTracker:
     def _filter_by_text_constraints(
         self, objects: list[MCPObjectState], tokens: set[str], instruction: str
     ) -> list[MCPObjectState]:
-        colors = {obj.color for obj in self.objects if obj.color}
-        sizes = {obj.size for obj in self.objects if obj.size}
+        category_tokens = {
+            token
+            for obj in self.objects
+            for token in self._tokens(obj.category)
+            if token
+        }
         locations = {
             word
             for obj in self.objects
@@ -138,8 +142,8 @@ class MCPStateTracker:
             if word in {"left", "right", "center", "middle", "top", "bottom", "front", "back"}
         }
 
-        color_constraints = tokens & _COLOR_WORDS
-        size_constraints = tokens & _SIZE_WORDS
+        color_constraints = (tokens & _COLOR_WORDS) - category_tokens
+        size_constraints = (tokens & _SIZE_WORDS) - category_tokens
         location_constraints = self._location_constraints(tokens, instruction, locations)
 
         filtered = objects

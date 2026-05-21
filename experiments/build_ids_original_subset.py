@@ -8,25 +8,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-
-GENERIC_OBJECTS = {
-    "block",
-    "bottle",
-    "box",
-    "cup",
-    "glue stick",
-    "marker",
-    "model",
-    "mouse",
-    "object",
-    "pan",
-    "scissors",
-    "switch",
-    "tape",
-    "tool",
-    "toy",
-    "umbrella",
-}
+from disambiguation.object_vocabulary import GENERIC_OBJECTS
 
 ATTRIBUTE_WORDS = {
     "red",

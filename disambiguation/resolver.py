@@ -4,6 +4,9 @@ from dataclasses import asdict, dataclass, field
 import re
 from typing import Any
 
+from .object_vocabulary import ATTRIBUTE_WORDS as _ATTRIBUTE_WORDS
+from .object_vocabulary import GENERIC_OBJECTS as _GENERIC_OBJECTS
+
 
 _SPATIAL_WORDS = {
     "left",
@@ -21,49 +24,6 @@ _SPATIAL_WORDS = {
     "nearest",
     "far",
     "farthest",
-}
-
-_ATTRIBUTE_WORDS = {
-    "red",
-    "blue",
-    "green",
-    "yellow",
-    "black",
-    "white",
-    "gray",
-    "grey",
-    "orange",
-    "purple",
-    "pink",
-    "small",
-    "large",
-    "big",
-    "tiny",
-    "wide",
-    "thin",
-    "square",
-    "rectangular",
-    "round",
-    "cylindrical",
-    "conical",
-}
-
-_GENERIC_OBJECTS = {
-    "block",
-    "bottle",
-    "box",
-    "cup",
-    "marker",
-    "model",
-    "mouse",
-    "object",
-    "pan",
-    "scissor",
-    "switch",
-    "tape",
-    "tool",
-    "toy",
-    "umbrella",
 }
 
 
@@ -114,7 +74,6 @@ class InstructionResolver:
                 reason_prefix="mcp_state",
             )
 
-        generic_object = self._find_generic_object(normalized)
         if self._state_has_single_mentioned_category(normalized):
             return self._result_from_candidates(
                 instruction=instruction,
@@ -122,6 +81,8 @@ class InstructionResolver:
                 candidates=[],
                 reason_prefix="mcp_state",
             )
+
+        generic_object = self._find_generic_object(normalized)
 
         if not self._should_check_candidates(normalized, mode):
             return DisambiguationResult(
@@ -234,10 +195,10 @@ class InstructionResolver:
         return False
 
     def _find_generic_object(self, instruction: str) -> str | None:
-        tokens = self._tokens(instruction)
-        for token in tokens:
-            if token in _GENERIC_OBJECTS:
-                return token
+        lowered = instruction.lower()
+        for obj in sorted(_GENERIC_OBJECTS, key=len, reverse=True):
+            if re.search(rf"\b{re.escape(obj)}s?\b", lowered):
+                return obj
         return None
 
     def _has_disambiguating_cue(self, instruction: str) -> bool:
